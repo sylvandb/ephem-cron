@@ -2,7 +2,7 @@
 00 00 * * * /usr/local/bin/heyu turn setevent on    # set
 00 00 * * * /usr/local/bin/heyu turn setevent on    # set +0.50
 00 00 * * * /usr/local/bin/heyu turn setevent on    # set -0.50 0:10
-00 00 * * * /usr/local/bin/heyu turn riseevent on   # rise  
+00 00 * * * /usr/local/bin/heyu turn riseevent on   # rise  0.00 0.1
 00 00 * * * /usr/local/bin/heyu turn riseevent on   # rise +0.5 
 00 00 * * * /usr/local/bin/heyu turn riseevent on   # rise -0:15 0:10
 00 18 * * * /usr/local/bin/heyu turn absevent on    # abs 
