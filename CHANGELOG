@@ -1,0 +1,11 @@
+0.30
+  o "x10events: don't trample month, day, and dow fields" - Brent DeShazer
+
+0.20
+  o fixed crontab "comment creep" caused by x10events
+  o x10events now pads hours and minutes with leading 0's
+  o added a FAQ.
+
+0.10
+  o initial release
+
