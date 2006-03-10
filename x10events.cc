@@ -40,15 +40,17 @@
 // 29 16 * * * /usr/local/bin/heyu turn office on      # set 0.1
 // 12 00 * * * /usr/local/bin/heyu turn office off     # abs 00:30 0.5
 
-#include <iostream.h>
-#include <strstream.h>
-#include <fstream.h>
-#include <math.h>
-#include <stdlib.h>
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <cmath>
+#include <cstdlib>
 #include <unistd.h>
-#include <time.h>
-#include <string.h>
-#include "ephem.h"
+#include <ctime>
+#include <string>
+#include "x10ephem.h"
+
+using namespace std;
 
 void print_modifed(ostream *out, int minute, int hour, 
 		   char* day, char* month, char* dow, 
@@ -130,11 +132,8 @@ void usage()
 
 int main (int argc, char *argv[])
 {
-  // this is stupid, but dynamic ostrstream doesnt seem to work
-  // properly on large strings - arggg!!  JAVAJAVAJAVAJAVA
-  char *outbuf = new char[1000000];
-  ostrstream out(outbuf, 1000000);
-
+  ostringstream out;
+ 
   istream *in = &cin;
   char *filename = (char*)NULL;
 
