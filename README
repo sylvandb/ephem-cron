@@ -52,6 +52,8 @@ The package has been tested and successfully builds and runs under
 Redhat 5.2, 6.0, 6.2, and 7.2, OSF1 V4.0 (CXX=g++), IRIX64 6.4
 (CXX=CC), and IRIX 6.5 (CXX=CC).
 
+The web page is http://www.drwren.com/ephem/
+
 Christopher R. Wren
 c@drwren.com
 
