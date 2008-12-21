@@ -24,7 +24,7 @@
 // comments in that code claim accuracy to the minute within 
 // several hundred years of 1994.
 //
-// latitute is positive North of the equator 
+// latitude is positive North of the equator 
 // longitude is positive East of the prime meridian 
 // timezones are positive East of UTC.
 //

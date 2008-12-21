@@ -453,15 +453,16 @@ int main (int argc, char *argv[])
   out.width(2); out.fill('0'); out << M;
   out.width(2); out.fill('0'); out << D << "-";
   out.width(2); out.fill('0'); out << tmp->tm_hour;
-  out.width(2); out.fill('0'); out << tmp->tm_min << ", sun=";
+  out.width(2); out.fill('0'); out << tmp->tm_min <<
+    "; " << fixedpoint(10,true,latitude) << "." << fixedpoint(10,false,latitude) <<
+    "N," << fixedpoint(10,true,longitude) << "." << fixedpoint(10,false,longitude) <<
+    "E; day=";
   out.width(2); out.fill('0'); out << rise/HOURMINS << ":";
   out.width(2); out.fill('0'); out << rise%HOURMINS << "-";
   out.width(2); out.fill('0'); out << set/HOURMINS << ":";
-  out.width(2); out.fill('0'); out << set%HOURMINS << ", " <<
+  out.width(2); out.fill('0'); out << set%HOURMINS << "; " <<
     (tmp->tm_isdst > 0 ? "dst" : (tmp->tm_isdst == 0 ? "nodst" : "?dst?")) <<
-    " @ " << fixedpoint(10,true,latitude) << "." << fixedpoint(10,false,latitude) <<
-    "N " << fixedpoint(10,true,longitude) << "." << fixedpoint(10,false,longitude) <<
-    "E" << endl;
+    endl;
 
   if (filename == (char*) NULL)
     {

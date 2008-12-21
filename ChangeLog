@@ -1,3 +1,11 @@
+ToDo:
+	* x10events: support dawn and dusk like rise and set
+
+0.45sdb
+	* x10events: tweak summary crontab comments
+	* suntime.c: added
+	* ephem.cc: corrected a comment typo
+
 0.44sdb
 	* x10events: add/revise header documentation
 	* x10events: tweak summary crontab comments

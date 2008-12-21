@@ -1,4 +1,4 @@
-VERSION=0.44sdb
+VERSION=0.45sdb
 
 DEF_LAT=42.3778343
 DEF_LON=-71.1063232
@@ -26,11 +26,14 @@ today: libephem.a today.o
 x10events: libephem.a x10events.o
 	$(CXX) ephem.o x10events.o -o x10events -L. -lephem -lm 
 
+suntime: suntime.c
+	$(CXX) $(CXXFLAGS) -o suntime suntime.c -L. -lm 
+
 TARTARGETS=BUGS COPYING README FAQ ChangeLog sample.cron \
 	  riseset.mat riseset.txt \
 	  astrotwilight.txt \
 	  civiltwilight.mat civiltwilight.txt \
-	  sunup.bas year.sh Makefile \
+	  sunup.bas suntime.c year.sh Makefile \
 	  ephem.cc ephem.h year.cc today.cc x10events.cc x10events.sh
 
 TARFILES= $(addprefix ephem-$(VERSION)/, $(TARTARGETS))
