@@ -1,8 +1,15 @@
-0.4sdb	* all: compile with gcc 3.3
+0.42sdb
+	* x10events: riseif and setif conditionals
+	* x10events: handle times as integer minutes (not floating point hours)
+
+0.41sdb
 	* all: timezone from environment, not specified
 	* all: default long-lat from Makefile
 	* all: version macro in Makefile
 	* x10events: more robust crontab sharing
+
+0.4sdb
+	* all: compile with gcc 3.3
 
 0.4
 	* x10events: fixed dropped zero mean in the presence of non-zero var

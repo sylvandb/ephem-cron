@@ -51,7 +51,6 @@
 
 /**********************************************************
  * ToDo:
- *   use integer math for time instead of floats and doubles
  */
 
 #include <iostream>
@@ -67,12 +66,15 @@
 #define _def2str(x) #x
 #define def2str(x) _def2str(x)
 
+#define HOURMINS 60L
+#define DAYMINS (24L * HOURMINS)
+
 using namespace std;
 
 void print_modifed(ostream *out, int minute, int hour, 
 		   char* day, char* month, char* dow, 
 		   char* command, char* tag,
-		   double fmean, char* mean, double fvar, char* var)
+		   int fmean, char* mean, int fvar, char* var)
 {
   out->width(2);
   out->fill('0');
@@ -89,52 +91,52 @@ void print_modifed(ostream *out, int minute, int hour,
   (*out) << " " << dow;
   (*out) << " " << command;
   (*out) << tag;
-  if (fmean!=0.0 || fvar!=0.0)  (*out) << " " << mean;
-  if (fvar!=0.0)  (*out) << " " << var;
+  if (fmean!=0 || fvar!=0)  (*out) << " " << mean;
+  if (fvar!=0)  (*out) << " " << var;
   (*out) << endl;
 }
 
-double wrap(double time)
+int wrap(int time)
 {
-  while (time < 0.0)   {time = time + 24.0;}
-  while (time >= 24.0) {time = time - 24.0;}
+  while (time < 0)        {time += DAYMINS;}
+  while (time >= DAYMINS) {time -= DAYMINS;}
   return(time);
 }
 
-double noise(double base, double var)
+int noise(int base, int var)
 {
   // deterministic
-  if (var == 0.0) return(base);
+  if (var == 0) return(base);
 
   // uniform over [-variance.variance]
-  var = fabs(var);
-  double diff = 2.0 * var * ((double) rand() / RAND_MAX) - var;
-  double time = base + diff;
-  return(wrap(time));
+  var = abs(var);
+  // how to make this calculation with integer math???
+  int diff = (int) ((2.0 * var * rand()) / RAND_MAX - var);
+  return(wrap(base + diff));
 }
 
-double timeconv(char *time)
+int timeconv(char *time)
 {
   if (time == (char*)NULL)
-    return(0.0);
+    return(0);
 
   if (!strchr(time, ':')) 
     {
-      return atof(time);
+      return atoi(time)*HOURMINS;
     }
   else
     {
       char* work = new char[strlen(time)+1];
       strcpy(work,time);
 
-      double hour = atof(strtok(work, ":"));	// get hour
-      double min = atof(strtok(NULL, ":"));	// get seconds
+      int hour = atoi(strtok(work, ":"));	// get hour
+      int min = atoi(strtok(NULL, ":"));	// get minutes
       delete [] work;
 
-      if (hour>=0.0 && '-' != *time)	 // preserve sign ???
-	return (hour + (min/60.0));
+      if (hour>=0 && '-' != *time)	 // preserve sign ???
+	return (hour * HOURMINS + min);
       else
-	return (hour - (min/60.0));
+	return (hour * HOURMINS - min);
     }
 }
 
@@ -149,6 +151,7 @@ void usage()
 
 int main (int argc, char *argv[])
 {
+  sleep(1);	// relinquish my timeslice for better randomness later
   // this is stupid, but dynamic ostrstream doesnt seem to work
   // properly on large strings - arggg!!  JAVAJAVAJAVAJAVA
   //char *outbuf = new char[1000000];
@@ -224,31 +227,34 @@ int main (int argc, char *argv[])
   srand(wallclock % 100000);
 
   int risep;
-  float rise;
+  float frise;
   float riseaz;
   int setp;
-  float set;
+  float fset;
   float setaz;
   int allday;
   
   riseset(latitude, longitude, timezone,
 	  Y, M, D,
-	  risep, rise, riseaz, setp, set, setaz, allday);
+	  risep, frise, riseaz, setp, fset, setaz, allday);
   
+  int rise=(int)(frise*HOURMINS);
+  int set=(int)(fset*HOURMINS);
+
   if (tmp->tm_isdst > 0)		// deal with daylight savings time
     {
-      rise += 1;
-      set += 1;
+      rise += HOURMINS;
+      set += HOURMINS;
     }
   
   if (!risep)
     {
-      rise = 00.00;
+      rise = 0;
     }
   
   if (!setp)
     {
-      set = 24.00;
+      set = DAYMINS;
     }
 
   unsigned int buflen = 256;
@@ -311,7 +317,7 @@ int main (int argc, char *argv[])
 
   	  if (command != (char *) NULL)
 	    {
-	      double special = 0.0;	  
+	      int special = 0;	  
 	      char* tag=NULL;
 	      char tagspace[30];	// room to spare
 	      bool conditional = false;
@@ -320,13 +326,13 @@ int main (int argc, char *argv[])
 		{
 		  conditional = true;
 		  tag = "#x10 riseif ";
-		  special = (atof(hour)*60 + atof(minute));
+		  special = atoi(hour)*HOURMINS + atoi(minute);
 		}
 	      if (!strcmp(token, "setif"))
 		{
 		  conditional = true;
 		  tag = "#x10 setif ";
-		  special = (atof(hour)*60 + atof(minute));
+		  special = atoi(hour)*HOURMINS + atoi(minute);
 		}
 	      
 	      if (conditional)
@@ -336,32 +342,32 @@ int main (int argc, char *argv[])
 
 	    offset = strtok((char *) NULL, " "); // offset
 	    variance = strtok((char *) NULL, " "); // randomize
-	    double mean = timeconv(offset);
-	    double var = timeconv(variance);
+	    int mean = timeconv(offset);
+	    int var = timeconv(variance);
 
-	      if (conditional && (mean!=0.0 || var!=0.0))
+	      if (conditional && (mean!=0 || var!=0))
 	      {
-		  special = 0.0;
+		  special = 0;
 	      }
 
 	      if (!strcmp(token, "abs"))
 		{
 		  tag = "#x10 abs";
 
-		  if ((mean==0.0) && (var==0.0))
+		  if ((mean==0) && (var==0))
 		    {
-		      special = (atof(hour)*60 + atof(minute));
+		      special = atoi(hour)*HOURMINS + atoi(minute);
 		    }
 		}
 	      if (!strcmp(token, "rise"))
 		{
 		  tag = "#x10 rise";
-		  special = rise*60;
+		  special = rise;
 		}
 	      if (!strcmp(token, "set"))
 		{
 		  tag = "#x10 set";
-		  special = set*60;
+		  special = set;
 		}
 
 
@@ -373,9 +379,10 @@ int main (int argc, char *argv[])
 	    }
 
 
-	    double time = wrap( noise( wrap(special/60+mean), var));
+	    // add in the random element
+	    int time = noise( wrap(special+mean), var);
 
-	    if (conditional) //!strcmp(token, "riseif") || !strcmp(token, "setif"))
+	    if (conditional)
 	    {
 		strcpy(tagspace,tag);
 		tag=tagspace;
@@ -394,9 +401,8 @@ int main (int argc, char *argv[])
 		}
 	    }
 
-	    time*=60;	// this gets rid of an off-by-1 in abs/riseif/setif
-	    int hour = (int) floor(time/60);
-	    int minute = (int) (time - hour*60.0);
+	    int hour   = (int) (time / HOURMINS);
+	    int minute = (int) (time % HOURMINS);
 	    //out << " #x10 special: " << special << "  time: " << time << endl;
 
 	    print_modifed(&out, minute, hour, 
@@ -413,7 +419,11 @@ int main (int argc, char *argv[])
   out.width(2); out.fill('0'); out << M;
   out.width(2); out.fill('0'); out << D << "-";
   out.width(2); out.fill('0'); out << tmp->tm_hour;
-  out.width(2); out.fill('0'); out << tmp->tm_min << endl;
+  out.width(2); out.fill('0'); out << tmp->tm_min << ", sunrise=";
+  out.width(2); out.fill('0'); out << rise/HOURMINS << ":";
+  out.width(2); out.fill('0'); out << rise%HOURMINS << ", sunset=";
+  out.width(2); out.fill('0'); out << set/HOURMINS << ":";
+  out.width(2); out.fill('0'); out << set%HOURMINS << endl;
 
   if (filename == (char*) NULL)
     {
