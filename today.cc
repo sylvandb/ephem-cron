@@ -5,11 +5,15 @@
 
 #include "ephem.h"
 
+#define _def2str(x) #x
+#define def2str(x) _def2str(x)
+
 int main (int argc, char *argv[])
 {
   if (argc != 1 && argc != 4)
     {
-      printf("usage: %s <lat(deg) long(deg) zone(hrs)>\n", argv[0]);
+      printf("today v:%s\nusage: %s <lat(deg) long(deg) zone(hrs)>\n"
+		      ,def2str(VERSION),argv[0]);
       exit(1);
     }
 
@@ -71,6 +75,14 @@ int main (int argc, char *argv[])
 	     (int)floor(set), 
 	     (int)((set-floor(set))*60),
 	     setaz);
+      if (risep)
+        {
+          riseaz=set-rise;
+          printf("for %02d:%02d of day.\n",
+    	     (int)floor(riseaz), 
+    	     (int)((riseaz-floor(riseaz))*60)
+    		      );
+        }
     }
   else
     {

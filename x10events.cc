@@ -448,21 +448,24 @@ int main (int argc, char *argv[])
     }
 
   // add my special ending tag lines
-  out << " #x10 operands: {rise|set|abs|riseif|setif} [before|after] [offset [variance]]" << endl;
-  out << " #x10 " def2str(VERSION) " processed " << Y;
+  //  #x10 oper's: {rise|set|abs|{riseif|setif {before|after}}} [offset [variance]]
+  out << " #x10 oper's: {rise|set|abs|{riseif|setif {before|after}}} [offset [variance]]" << endl;
+  // order least frequently changed info to most
+  //  #x10 @ latN,lonE; {ver} processed 20041114-0305; nodst, day=07:39-17:20
+  out << " #x10 @ " <<
+    fixedpoint(10,true,latitude) << "." << fixedpoint(10,false,latitude) << "N," <<
+    fixedpoint(10,true,longitude) << "." << fixedpoint(10,false,longitude) << "E; " <<
+    def2str(VERSION) " processed " << Y;
   out.width(2); out.fill('0'); out << M;
   out.width(2); out.fill('0'); out << D << "-";
   out.width(2); out.fill('0'); out << tmp->tm_hour;
-  out.width(2); out.fill('0'); out << tmp->tm_min <<
-    "; " << fixedpoint(10,true,latitude) << "." << fixedpoint(10,false,latitude) <<
-    "N," << fixedpoint(10,true,longitude) << "." << fixedpoint(10,false,longitude) <<
-    "E; day=";
+  out.width(2); out.fill('0'); out << tmp->tm_min << "; " <<
+    (tmp->tm_isdst > 0 ? "dst" : (tmp->tm_isdst == 0 ? "nodst" : "?dst?")) <<
+    ", day=";
   out.width(2); out.fill('0'); out << rise/HOURMINS << ":";
   out.width(2); out.fill('0'); out << rise%HOURMINS << "-";
   out.width(2); out.fill('0'); out << set/HOURMINS << ":";
-  out.width(2); out.fill('0'); out << set%HOURMINS << "; " <<
-    (tmp->tm_isdst > 0 ? "dst" : (tmp->tm_isdst == 0 ? "nodst" : "?dst?")) <<
-    endl;
+  out.width(2); out.fill('0'); out << set%HOURMINS << endl;
 
   if (filename == (char*) NULL)
     {

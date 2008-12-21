@@ -27,6 +27,14 @@
 
 int main (int argc, char *argv[])
 {
+  int verbose=0;
+  char *arg=argv[1];
+  while ( argc>1 && arg[0]=='-' && arg[1]=='v' )
+    {
+      verbose++;
+      argc--;
+      arg=argv[1+verbose];
+    }
   if (argc != 1 && argc != 4)
     {
       printf("usage: %s <lat(deg) long(deg) zone(hrs)>\n", argv[0]);
@@ -76,9 +84,13 @@ int main (int argc, char *argv[])
       riseset(latitude, longitude, timezone, Y, M, D, 
 	      risep, rise, riseaz, setp, set, setaz, allday);
       
-//       fprintf(stderr,"%3d %3d %3d %3d %f %f\n", 
-// 	      tmp->tm_yday, risep, setp, allday,
-// 	      rise, set);
+      if (verbose>1) {
+         fprintf(stderr,"%3d %3d %3d %3d %f %f\n", 
+ 	      tmp->tm_yday, risep, setp, allday,
+ 	      rise, set);
+      } else if (verbose) {
+	 printf("%3d - ",day);
+      }
 
 //       if (tmp->tm_isdst)		// deal with daylight savings time
 // 	{

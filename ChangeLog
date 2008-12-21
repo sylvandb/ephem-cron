@@ -1,6 +1,10 @@
 ToDo:
 	* x10events: support dawn and dusk like rise and set
 
+0.46sdb
+	* x10events: tweak summary crontab comments
+	* year: -v option to output day of year, -v -v for debug output
+
 0.45sdb
 	* x10events: tweak summary crontab comments
 	* suntime.c: added
@@ -48,8 +52,8 @@ ToDo:
 
 0.1
 	* Initial 
+
 thanks to
-	
 	"Phil Gregory" <phil_g@pobox.com>
 	"Russell Salerno" <rsalerno@li.net>
 	"Matt Williams" <mattrwilliams@yahoo.com>
