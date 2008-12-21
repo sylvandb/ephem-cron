@@ -82,9 +82,9 @@
 using namespace std;
 
 void print_modifed(ostream *out, int minute, int hour, 
-		   char* day, char* month, char* dow, 
-		   char* command, char* tag,
-		   char* mean, char* var)
+		   const char* day, const char* month, const char* dow, 
+		   const char* command, const char* tag,
+		   const char* mean, const char* var)
 {
   out->width(2);
   out->fill('0');
@@ -350,8 +350,8 @@ int main (int argc, char *argv[])
   	  if (command != (char *) NULL)
 	    {
 	      int special = 0;	  
-	      char* tag=NULL;
-	      char tagspace[30];	// room to spare
+	      const char* tag=NULL;
+	      char tagspace[300];	// room to spare
 	      bool conditional = false;
 	      
 	      if (!strcmp(token, "riseif"))
@@ -408,8 +408,8 @@ int main (int argc, char *argv[])
 	    {
 		// space ("# x10") prevents future processing
 		strcpy(tagspace,"# x10 unknown: ");
+		strcat(tagspace,token);
 		tag=tagspace;
-		strcat(tag,token);
 	    }
 
 
@@ -423,13 +423,13 @@ int main (int argc, char *argv[])
 
 		if ('b'==*side)	// before
 		{
-		    strcat(tag,"before");
+		    strcat(tagspace,"before");
 		    if (time > ('r'==*token?rise:set)) // time not before
   			out << " #x10# ";
 		}
 		else		// after
 		{
-		    strcat(tag,"after");
+		    strcat(tagspace,"after");
 		    if (time < ('r'==*token?rise:set)) // time not after
   			out << " #x10# ";
 		}
