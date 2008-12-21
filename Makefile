@@ -12,7 +12,7 @@ clean:
 	rm -f year.o today.o x10events.o
 
 realclean: clean
-	rm -f year today x10events
+	rm -f year today x10events suntime
 
 libephem.a: ephem.o
 	ar r libephem.a ephem.o
