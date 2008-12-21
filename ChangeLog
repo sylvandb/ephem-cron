@@ -1,19 +1,24 @@
+0.44sdb
+	* x10events: add/revise header documentation
+	* x10events: tweak summary crontab comments
+
 0.43sdb
 	* x10events: fix: again support decimal hours (eg 1.1=1:06)
-	* x10events: preserve crontab's original "mean" and "variance"
+	* x10events: preserve crontab's original "mean" and "variance" strings
 
 0.42sdb
 	* x10events: new: riseif and setif conditionals
-	* x10events: fix: handle times as integer minutes (not floating point hours)
+	* x10events: fix: calc times as integer minutes (not floating point)
 
 0.41sdb
 	* all: timezone from environment, not specified
 	* all: default long-lat from Makefile
 	* all: version macro in Makefile
 	* x10events: more robust crontab sharing
+	* x10events: append summary comments to crontab
 
 0.4sdb
-	* all: compile with gcc 3.3
+	* all: compile cleanly with gcc 3.3
 
 0.4
 	* x10events: fixed dropped zero mean in the presence of non-zero var

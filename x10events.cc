@@ -18,35 +18,43 @@
 // by "Christpher R. Wren" <c@drwren.com>
 // Sun Oct 10 1999 
 
-// interpret crontab vomments and modify the entry accordingly
-// comments should be # {token} [offset] [variance]
-// where
-//   {token} is one of
-//      "rise" for times relative to sunrise
-//      "set" for times relative to sunset
-//      "riseif before" conditional if time is before sunrise
-//      "riseif after"  conditional if time is after sunrise
-//      "setif before" conditional if time is before sunset
-//      "setif after"  conditional if time is after sunset
-// 	"abs" for absolute times, see note below
-//   offset specifies time relative to the token
-//   variance specifies a bound for uniform noise added to the time 
-// offset and variance may be specified as decimal hours or as [-]hh:mm
+// interpret crontab comments and modify the entry accordingly
+// comments should be #x10 {token} [offset [variance]]
+// where {token} is one of:
+//   abs		for absolute times, see note below
+//   rise		for times relative to sunrise
+//   set		for times relative to sunset
+//   riseif before	conditional if time is before sunrise, see note
+//   riseif after	conditional if time is after sunrise, see note
+//   setif before	conditional if time is before sunset, see note
+//   setif after	conditional if time is after sunset, see note
+// and:
+//  offset		specifies time relative to the token
+//  variance		specifies a bound for uniform noise added to the time
+//  offset / variance	may be specified as decimal hours or as [-]hh:mm
 //
-// special note:
-//   If abs specifies an offset and variance, then the offset is the mean time.
-//   If no arguments are specified for abs, then the time is as specified by
-//   the hour and minute cron fields.
+// note for abs and riseif/setif:
+//  * If offset is specified, then the offset value is the mean/base time.
+//  * If no arguments, then the crontab hour and minute fields are the time.
 //
 // for example:
 // 
-// 11 07 * * * /usr/local/bin/heyu turn tree on        #x10 rise
-// 36 16 * * * /usr/local/bin/heyu turn tree off       #x10 set 0.1
-// 04 16 * * * /usr/local/bin/heyu turn floorlamp on   #x10 set -0.50
-// 00 00 * * * /usr/local/bin/heyu turn floorlamp off  #x10 abs
-// 29 16 * * * /usr/local/bin/heyu turn office on      #x10 set 0.1
-// 12 00 * * * /usr/local/bin/heyu turn office off     #x10 abs 00:30 0.5
-// 00 08 * * * /usr/local/bin/heyu turn overhead on    #x10 riseif before
+// execute at sunrise
+//   11 07 * * * /usr/local/bin/heyu turn tree on        #x10 rise
+// execute at 6 minutes (0.1 hour) after sunset
+//   36 16 * * * /usr/local/bin/heyu turn tree off       #x10 set 0.1
+//   36 16 * * * /usr/local/bin/heyu turn tree off       #x10 set 0:06
+// execute at 30 minutes (0.5 hour) before sunset
+//   04 16 * * * /usr/local/bin/heyu turn floorlamp on   #x10 set -0.50
+// execute at midnight
+//   00 00 * * * /usr/local/bin/heyu turn floorlamp off  #x10 abs
+// execute at 30 minutes after midnight, +/- 30 minutes
+//   12 00 * * * /usr/local/bin/heyu turn office off     #x10 abs 00:30 0.5
+// execute at 7am, if that is before sunrise
+//   00 07 * * * /usr/local/bin/heyu turn overhead on    #x10 riseif before
+//   99 99 * * * /usr/local/bin/heyu turn overhead on    #x10 riseif before 7:00
+// execute at 7am +/- 15 minutes, if that is before sunrise
+//   99 99 * * * /usr/local/bin/heyu turn overhead on    #x10 riseif before 7:00 0:15
 
 
 /**********************************************************
@@ -146,6 +154,15 @@ int timeconv(char *time)
     }
 }
 
+int fixedpoint(int offset,bool intpart,double f)
+{
+  if (intpart)
+    return (int)f;
+  return f<0 ?
+    -((int)(-0.5 + offset * (f-(int)f))) :
+    +((int)( 0.5 + offset * (f-(int)f)));
+}
+
 void usage()
 {
   cerr << "usage: x10events";
@@ -158,6 +175,7 @@ void usage()
 int main (int argc, char *argv[])
 {
   sleep(1);	// relinquish my timeslice for better randomness later
+
   // this is stupid, but dynamic ostrstream doesnt seem to work
   // properly on large strings - arggg!!  JAVAJAVAJAVAJAVA
   //char *outbuf = new char[1000000];
@@ -185,12 +203,19 @@ int main (int argc, char *argv[])
   } else
     timezone = (double)parseTimezone(0,NULL);
   
+  // valid args:
+  //   1==prog
+  //   2==prog fspec
+  //   4==prog lat lon zone
+  //   5==prog fspec lat lon zone
   if ((argc!=1) && (argc!=2) && (argc!=4) && (argc!=5))
     {
       usage();
     }
   
   int arg = 1;
+
+  // process filename
   if ((argc==2) || (argc==5))
     {
       filename = argv[arg];
@@ -204,6 +229,7 @@ int main (int argc, char *argv[])
       arg++;
     }
   
+  // process lat, lon, and zone
   if ((arg==1) && (argc==4) ||
       (arg==2) && (argc==5))
     {
@@ -422,16 +448,20 @@ int main (int argc, char *argv[])
     }
 
   // add my special ending tag lines
-  out << " #x10 operands:  {rise|set|abs|riseif|setif} [before|after] [offset [variance]]" << endl;
+  out << " #x10 operands: {rise|set|abs|riseif|setif} [before|after] [offset [variance]]" << endl;
   out << " #x10 " def2str(VERSION) " processed " << Y;
   out.width(2); out.fill('0'); out << M;
   out.width(2); out.fill('0'); out << D << "-";
   out.width(2); out.fill('0'); out << tmp->tm_hour;
-  out.width(2); out.fill('0'); out << tmp->tm_min << ", sunrise=";
+  out.width(2); out.fill('0'); out << tmp->tm_min << ", sun=";
   out.width(2); out.fill('0'); out << rise/HOURMINS << ":";
-  out.width(2); out.fill('0'); out << rise%HOURMINS << ", sunset=";
+  out.width(2); out.fill('0'); out << rise%HOURMINS << "-";
   out.width(2); out.fill('0'); out << set/HOURMINS << ":";
-  out.width(2); out.fill('0'); out << set%HOURMINS << endl;
+  out.width(2); out.fill('0'); out << set%HOURMINS << ", " <<
+    (tmp->tm_isdst > 0 ? "dst" : (tmp->tm_isdst == 0 ? "nodst" : "?dst?")) <<
+    " @ " << fixedpoint(10,true,latitude) << "." << fixedpoint(10,false,latitude) <<
+    "N " << fixedpoint(10,true,longitude) << "." << fixedpoint(10,false,longitude) <<
+    "E" << endl;
 
   if (filename == (char*) NULL)
     {
