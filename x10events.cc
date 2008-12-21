@@ -51,6 +51,8 @@
 
 /**********************************************************
  * ToDo:
+ *   resolve issue with crontab(5):
+ *     "comments are not allowed on the same line as a command"
  */
 
 #include <iostream>
@@ -74,7 +76,7 @@ using namespace std;
 void print_modifed(ostream *out, int minute, int hour, 
 		   char* day, char* month, char* dow, 
 		   char* command, char* tag,
-		   int fmean, char* mean, int fvar, char* var)
+		   char* mean, char* var)
 {
   out->width(2);
   out->fill('0');
@@ -91,8 +93,12 @@ void print_modifed(ostream *out, int minute, int hour,
   (*out) << " " << dow;
   (*out) << " " << command;
   (*out) << tag;
-  if (fmean!=0 || fvar!=0)  (*out) << " " << mean;
-  if (fvar!=0)  (*out) << " " << var;
+  if (NULL!=mean)
+    (*out) << " " << mean;
+  else if (NULL!=var)
+    (*out) << " 0";
+  if (NULL!=var)
+    (*out) << " " << var;
   (*out) << endl;
 }
 
@@ -110,8 +116,8 @@ int noise(int base, int var)
 
   // uniform over [-variance.variance]
   var = abs(var);
-  // how to make this calculation with integer math???
-  int diff = (int) ((2.0 * var * rand()) / RAND_MAX - var);
+  // make this calculation with integer math???
+  int diff = lrint((2.0 * var * rand()) / RAND_MAX - var);
   return(wrap(base + diff));
 }
 
@@ -122,7 +128,7 @@ int timeconv(char *time)
 
   if (!strchr(time, ':')) 
     {
-      return atoi(time)*HOURMINS;
+      return lrint(atof(time)*HOURMINS);	// rework w/atoi()???
     }
   else
     {
@@ -133,7 +139,7 @@ int timeconv(char *time)
       int min = atoi(strtok(NULL, ":"));	// get minutes
       delete [] work;
 
-      if (hour>=0 && '-' != *time)	 // preserve sign ???
+      if (hour>=0 && '-' != *time)	 // preserve sign even w/hours==0
 	return (hour * HOURMINS + min);
       else
 	return (hour * HOURMINS - min);
@@ -238,8 +244,8 @@ int main (int argc, char *argv[])
 	  Y, M, D,
 	  risep, frise, riseaz, setp, fset, setaz, allday);
   
-  int rise=(int)(frise*HOURMINS);
-  int set=(int)(fset*HOURMINS);
+  int rise=lrint(frise*HOURMINS);
+  int set=lrint(fset*HOURMINS);
 
   if (tmp->tm_isdst > 0)		// deal with daylight savings time
     {
@@ -342,6 +348,7 @@ int main (int argc, char *argv[])
 
 	    offset = strtok((char *) NULL, " "); // offset
 	    variance = strtok((char *) NULL, " "); // randomize
+	    // finish strtok()'s above, because timeconv() uses strtok()
 	    int mean = timeconv(offset);
 	    int var = timeconv(variance);
 
@@ -373,6 +380,7 @@ int main (int argc, char *argv[])
 
 	    if (!tag)
 	    {
+		// space ("# x10") prevents future processing
 		strcpy(tagspace,"# x10 unknown: ");
 		tag=tagspace;
 		strcat(tag,token);
@@ -408,7 +416,7 @@ int main (int argc, char *argv[])
 	    print_modifed(&out, minute, hour, 
 			  day, month, dow,
 			  command, tag,
-			  mean, offset, var, variance);
+			  offset, variance);
 	  }
 	}
     }

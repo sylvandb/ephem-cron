@@ -1,6 +1,10 @@
+0.43sdb
+	* x10events: fix: again support decimal hours (eg 1.1=1:06)
+	* x10events: preserve crontab's original "mean" and "variance"
+
 0.42sdb
-	* x10events: riseif and setif conditionals
-	* x10events: handle times as integer minutes (not floating point hours)
+	* x10events: new: riseif and setif conditionals
+	* x10events: fix: handle times as integer minutes (not floating point hours)
 
 0.41sdb
 	* all: timezone from environment, not specified
