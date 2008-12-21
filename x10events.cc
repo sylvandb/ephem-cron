@@ -290,7 +290,7 @@ int main (int argc, char *argv[])
     }
 
   unsigned int buflen = 256;
-  char *buf = new char[buflen];
+  char buf[buflen];
 
   
   while(! in->eof())
@@ -300,7 +300,7 @@ int main (int argc, char *argv[])
         {
 	  out << buf << endl;
         }
-      else
+      else if (*buf)
         {
 	  char *command;
 	  char *token;
@@ -351,7 +351,7 @@ int main (int argc, char *argv[])
 	    {
 	      int special = 0;	  
 	      const char* tag=NULL;
-	      char tagspace[300];	// room to spare
+	      char tagspace[buflen];	// room to spare
 	      bool conditional = false;
 	      
 	      if (!strcmp(token, "riseif"))
@@ -425,13 +425,13 @@ int main (int argc, char *argv[])
 		{
 		    strcat(tagspace,"before");
 		    if (time > ('r'==*token?rise:set)) // time not before
-  			out << " #x10# ";
+  			out << " #x10# ";  // preface the line with a comment
 		}
 		else		// after
 		{
 		    strcat(tagspace,"after");
 		    if (time < ('r'==*token?rise:set)) // time not after
-  			out << " #x10# ";
+  			out << " #x10# ";  // preface the line with a comment
 		}
 	    }
 
