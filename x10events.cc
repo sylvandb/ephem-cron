@@ -284,7 +284,7 @@ int main (int argc, char *argv[])
       set = DAYMINS;
     }
 
-  unsigned int buflen = 256;
+  unsigned int buflen = 2560;
   char buf[buflen];
 
   
