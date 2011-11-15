@@ -74,6 +74,7 @@ x10events.o: x10events.cc x10ephem.h
 plot: plot.gif
 
 plot.gif: plot.gnuplot rise-my.txt set-my.txt rise-off.txt set-off.txt
+	@rm -f $@
 	gnuplot   < $<   > $@
 
 clean-plot:
@@ -81,11 +82,21 @@ clean-plot:
 
 define PLOTCOMMANDS
 set terminal gif
-set title  "Calculated sunrise and sunset"
-set xlabel "Julian Day"
+set title  "Calculated Sunrise and Sunset\\nAdd any local adjustment for Daylight Time"
+set xlabel "Day of Year"
 set ylabel "Hour of Day"
-set xrange [0:365]
+set xrange [0:366]
+set xtics ( \
+	"1Jan" 0, "1Jul" 182, "31Dec" 365, \
+	""  31,  ""  60,  ""  90,  "" 121,  "" 151, \
+	"" 213,  "" 243,  "" 274,  "" 304,  "" 335)
 set yrange [0:24]
+set ytics ( \
+	"midnight" 0, "3am"  3, "6am"  6, "9am"  9, \
+	"noon"    12, "3pm" 15, "6pm" 18, "9pm" 21, \
+	""  1,  ""  2,   ""  4,  ""  5,   ""  7,  ""  8, "" 10, "" 11, \
+	"" 13,  "" 14,   "" 16,  "" 17,   "" 19,  "" 20, "" 22, "" 23)
+set grid
 set style data lines
 plot \\
   "rise-my.txt"   title "calculated rise", \\
@@ -95,17 +106,28 @@ plot \\
 endef
 export PLOTCOMMANDS
 plot.gnuplot: Makefile
-	rm -f $@
+	@rm -f $@
 	echo "$$PLOTCOMMANDS" >> $@
 
 rise-off.txt: riseset.mat
+	@rm -f $@
 	awk '{print $$1}'   < $<   > $@
 
 set-off.txt: riseset.mat
+	@rm -f $@
 	awk '{print $$2}'   < $<   > $@
 
-rise-my.txt: year
-	./year 42.3778343 -71.1063232 -5 | awk '{print $$1}' > $@
+rise-my.txt: year Makefile
+	@rm -f $@
+	./year ${DEF_LAT} ${DEF_LON} ${DEF_TZ} | awk '{print $$1}' > $@
 
-set-my.txt: year
-	./year 42.3778343 -71.1063232 -5 | awk '{print $$2}' > $@
+set-my.txt: year Makefile
+	@rm -f $@
+	./year ${DEF_LAT} ${DEF_LON} ${DEF_TZ} | awk '{print $$2}' > $@
+
+# http://aa.usno.navy.mil/data/docs/RS_OneYear.php
+# http://aa.usno.navy.mil/cgi-bin/aa_rstablew.pl
+# POSTDATA=FFX=1&xxy=2011&type=0&st=ID&place=boise&ZZZ=END
+# POSTDATA=FFX=2&xxy=2011&type=0&place=a+post+--+W116+13%2C+N43+37&xx0=-1&xx1=116&xx2=13&yy0=1&yy1=43&yy2=37&zz1=7&zz0=-1&ZZZ=END
+#local-off.txt:
+#	curl blah, blah, blah...
