@@ -80,7 +80,7 @@ plot.gif: plot.gnuplot rise-my.txt set-my.txt rise-off.txt set-off.txt
 clean-plot:
 	rm -f rise-off.txt set-off.txt rise-my.txt set-my.txt
 	rm -f plot.gnuplot plot.gif
-	rm -f txt2mat.sh local-off.mat
+	rm -f getofftxt.sh  txt2mat.sh official.mat
 
 define PLOTCOMMANDS
 set terminal gif
@@ -111,11 +111,11 @@ plot.gnuplot: Makefile
 	@rm -f $@
 	echo "$$PLOTCOMMANDS" >> $@
 
-rise-off.txt: riseset.mat
+rise-off.txt: official.mat
 	@rm -f $@
 	awk '{print $$1}'   < $<   > $@
 
-set-off.txt: riseset.mat
+set-off.txt: official.mat
 	@rm -f $@
 	awk '{print $$2}'   < $<   > $@
 
@@ -145,7 +145,7 @@ txt2mat.sh: Makefile
 	echo "$$TXT2MAT" >> $@
 	@chmod u+x $@
 
-local-off.mat: local-off.txt txt2mat.sh  getofftxt.sh
+official.mat: official.txt txt2mat.sh  getofftxt.sh
 	@rm -f $@
 	./txt2mat.sh   $<   >> $@
 
@@ -194,5 +194,5 @@ getofftxt.sh: Makefile
 	@chmod u+x $@
 
 # don't needlessly fetch, remove by hand to refetch
-local-off.txt:
+official.txt:
 	./getofftxt.sh ${DEF_LAT} ${DEF_LON} ${DEF_TZ}   > $@
