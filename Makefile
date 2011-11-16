@@ -148,3 +148,51 @@ txt2mat.sh: Makefile
 local-off.mat: local-off.txt txt2mat.sh  getofftxt.sh
 	@rm -f $@
 	./txt2mat.sh   $<   >> $@
+
+
+# retrieve one day:
+#   http://aa.usno.navy.mil/data/docs/RS_OneDay.php
+#   curl -d 'FFX=1&ID=LinuxCurl&xxy=2010&xxm=11&xxd=15&st=ID&place=boise&ZZZ=END' http://aa.usno.navy.mil/cgi-bin/aa_pap.pl
+# retrieve one year:
+#   http://aa.usno.navy.mil/data/docs/RS_OneYear.php
+#   curl -d 'FFX=1&xxy=2011&type=0&st=ID&place=boise&ZZZ=END' http://aa.usno.navy.mil/cgi-bin/aa_rstablew.pl
+#   curl -d 'FFX=2&xxy=2011&type=0&place=Some+Place+at+W116+13%2C+N43+37&xx0=-1&xx1=116&xx2=13&yy0=1&yy1=43&yy2=37&zz1=7&zz0=-1&ZZZ=END' http://aa.usno.navy.mil/cgi-bin/aa_rstablew.pl
+
+define GETOFFTXT
+#!/bin/sh
+# retrieve official data from:
+#   http://aa.usno.navy.mil/data/docs/RS_OneYear.php
+lat=$$1; shift
+lon=$$1; shift
+zon=$$1; shift
+# year
+test "$$1" && xxy=$$1 || xxy=$$(date +%Y)
+# convert 1 to 4 digits to minutes, assumes the digits are the decimal portion
+tomins() { d=$${1}0000; e=$${d#????}; d=$${d%$$e}; echo $$(((60* d +5000)/10000)); }
+# lon (pos integer)
+xx1=$${lon%.*}
+# lon minutes (pos integer)
+xx2=$$(tomins $${lon#*.})
+# lon sign (-1=West/1)
+xx0=1; test $$xx1 -lt 0 && xx0=-1 && xx1=$$((xx1 * -1))
+# lat (pos integer)
+yy1=$${lat%.*}
+# lat minutes (pos integer)
+yy2=$$(tomins $${lat#*.})
+# lat sign (-1/1=North)
+yy0=1; test $$yy1 -lt 0 && yy0=-1 && yy1=$$((yy1 * -1))
+# time zone hours (pos integer)
+zz1=$$zon
+# time zone sign (-1=West/1)
+zz0=1; test $$zz1 -lt 0 && zz0=-1 && zz1=$$((zz1 * -1))
+curl -d 'FFX=2&xxy='$$xxy'&type=0&place=Some+Place&xx0='$$xx0'&xx1='$$xx1'&xx2='$$xx2'&yy0='$$yy0'&yy1='$$yy1'&yy2='$$yy2'&zz1='$$zz1'&zz0='$$zz0'&ZZZ=END' http://aa.usno.navy.mil/cgi-bin/aa_rstablew.pl
+endef
+export GETOFFTXT
+getofftxt.sh: Makefile
+	@rm -f $@
+	echo "$$GETOFFTXT" >> $@
+	@chmod u+x $@
+
+# don't needlessly fetch, remove by hand to refetch
+local-off.txt:
+	./getofftxt.sh ${DEF_LAT} ${DEF_LON} ${DEF_TZ}   > $@
