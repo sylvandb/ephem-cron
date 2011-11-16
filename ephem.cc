@@ -36,6 +36,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
+#include <ctype.h>
 
 #define P1 (M_PI)
 #define P2 (2*P1)
@@ -436,9 +437,7 @@ riseset(float B5,		// Latitude +N -S
 
 
 
-#include <time.h>
-#include <ctype.h>
-
+// pulled in from today.cc so other apps could use it
 float parseTimezone(int argc,char **argv)
 {
   float zone;
