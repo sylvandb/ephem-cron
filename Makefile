@@ -78,7 +78,9 @@ plot.gif: plot.gnuplot rise-my.txt set-my.txt rise-off.txt set-off.txt
 	gnuplot   < $<   > $@
 
 clean-plot:
-	rm -f rise-off.txt set-off.txt rise-my.txt set-my.txt plot.gnuplot plot.gif
+	rm -f rise-off.txt set-off.txt rise-my.txt set-my.txt
+	rm -f plot.gnuplot plot.gif
+	rm -f txt2mat.sh local-off.mat
 
 define PLOTCOMMANDS
 set terminal gif
@@ -98,10 +100,10 @@ set ytics ( \
 	"" 13,  "" 14,   "" 16,  "" 17,   "" 19,  "" 20, "" 22, "" 23)
 set grid
 set style data lines
-plot \\
-  "rise-my.txt"   title "calculated rise", \\
-  "rise-off.txt"  title "official rise",   \\
-  "set-my.txt"    title "calculated set",  \\
+plot \
+  "rise-my.txt"   title "calculated rise", \
+  "rise-off.txt"  title "official rise",   \
+  "set-my.txt"    title "calculated set",  \
   "set-off.txt"   title "official set"
 endef
 export PLOTCOMMANDS
@@ -125,9 +127,24 @@ set-my.txt: year Makefile
 	@rm -f $@
 	./year ${DEF_LAT} ${DEF_LON} ${DEF_TZ} | awk '{print $$2}' > $@
 
-# http://aa.usno.navy.mil/data/docs/RS_OneYear.php
-# http://aa.usno.navy.mil/cgi-bin/aa_rstablew.pl
-# POSTDATA=FFX=1&xxy=2011&type=0&st=ID&place=boise&ZZZ=END
-# POSTDATA=FFX=2&xxy=2011&type=0&place=a+post+--+W116+13%2C+N43+37&xx0=-1&xx1=116&xx2=13&yy0=1&yy1=43&yy2=37&zz1=7&zz0=-1&ZZZ=END
-#local-off.txt:
-#	curl blah, blah, blah...
+
+define TXT2MAT
+#!/bin/sh
+# process official data from:
+#   http://aa.usno.navy.mil/data/docs/RS_OneYear.php
+# for use by 'plot'
+for month in `seq 0 11`; do
+  cat "$$1" | awk '/^[0-9][0-9]/' | sed 's/            /  xxxx xxxx  /g' |
+  awk 'function hm2h(hm) {return substr(hm,1,2)+(substr(hm,3,2)/60)}  BEGIN {mon='$$month'}  {r=$$(2+mon*2);s=$$(3+mon*2);if (r!=s && r!="xxxx") {printf "%05.2f %05.2f\\n",hm2h(r),hm2h(s)}}'
+  echo "Month: $$month" >&2
+done
+endef
+export TXT2MAT
+txt2mat.sh: Makefile
+	@rm -f $@
+	echo "$$TXT2MAT" >> $@
+	@chmod u+x $@
+
+local-off.mat: local-off.txt txt2mat.sh  getofftxt.sh
+	@rm -f $@
+	./txt2mat.sh   $<   >> $@
