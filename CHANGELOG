@@ -1,6 +1,48 @@
+ToDo:
+	* x10events: support dawn and dusk like rise and set
+
+
+0.51sdb
+	* x10events: handle lines up to 2.5KBytes (was 256 bytes)
+
+0.5sdb
+	* bluack on the C++ style headers
+	* merged with my other changes, cleaned up dir, etc.
+
 0.5
 	* x10events: include Doug's deprecated headers fix
 	* rpm: added a spec file for rpms, tested on FC2
+
+0.46sdb
+	* x10events: tweak summary crontab comments
+	* year: -v option to output day of year, -v -v for debug output
+
+0.45sdb
+	* x10events: tweak summary crontab comments
+	* suntime.c: added
+	* ephem.cc: corrected a comment typo
+
+0.44sdb
+	* x10events: add/revise header documentation
+	* x10events: tweak summary crontab comments
+
+0.43sdb
+	* x10events: fix: again support decimal hours (eg 1.1=1:06)
+	* x10events: preserve crontab's original "mean" and "variance" strings
+
+0.42sdb
+	* x10events: new: riseif and setif conditionals
+	* x10events: fix: calc times as integer minutes (not floating point)
+
+0.41sdb
+	* all: timezone from environment, not specified
+	* all: default long-lat from Makefile
+	* all: version macro in Makefile
+	* x10events: more robust crontab sharing
+	* x10events: append summary comments to crontab
+
+0.4sdb
+	* all: compile cleanly with gcc 3.3
 
 0.4
 	* x10events: fixed dropped zero mean in the presence of non-zero var
