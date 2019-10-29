@@ -66,12 +66,12 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include <math.h>
-#include <stdlib.h>
+#include <cmath>
+#include <cstdlib>
 #include <unistd.h>
-#include <time.h>
-#include <string.h>
-#include "ephem.h"
+#include <ctime>
+#include <cstring>
+#include "x10ephem.h"
 
 #define _def2str(x) #x
 #define def2str(x) _def2str(x)
@@ -176,11 +176,6 @@ int main (int argc, char *argv[])
 {
   sleep(1);	// relinquish my timeslice for better randomness later
 
-  // this is stupid, but dynamic ostrstream doesnt seem to work
-  // properly on large strings - arggg!!  JAVAJAVAJAVAJAVA
-  //char *outbuf = new char[1000000];
-  //ostrstream out(outbuf, 1000000);
-  //  that's right, strstream is BROKEN!!!!  using stringstream instead.
   ostringstream out;
 
   istream *in = &cin;

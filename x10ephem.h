@@ -19,6 +19,9 @@
 // August 5 1999
 
 
+float parseTimezone(int argc,char **argv);
+
+
 extern void
 sunpos(float T,			// Julian day
        float TT,		// fractional centuries since 1900
