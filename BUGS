@@ -1,0 +1,32 @@
+Sun Oct 10 11:06:45 1999 c@drwren.com
+
+The first sunset after a period of 24 hour sun seems to always get
+missed.  For instance, how can there be a period of 24-hour sun
+previous to julian date 248 when there is a sunrise on 248?  Where's
+the sunset on julian day 247: 
+
+ Julian Day  risep setp allday    rise	     set
+     245       0     0     1   149.449997 173.033325
+     246       0     0     1   150.449997 174.033325
+     247       0     0     1   151.449997  22.916666
+     248       1     1     0     0.550000  22.266666
+     249       1     1     0     1.200000  21.833334
+     250       1     1     0     1.633333  21.450001
+
+Notice that the rise time seems perfectly reasonable on julian day
+247, but setp still isn't set... hmmm.
+
+----------------------------------------------------------------------
+
+the tm_isdst check will use the timezone definitions of the current
+computer.  I really should allow setting the timezone.
+
+----------------------------------------------------------------------
+
+Support "civil twilight" and "astronomical twilight" as well as zero
+crossing?  What about arbitrary solar intersections?  The weather info
+pages don't seem to report zero-crossing.  What do they report?
+civil? something else?
+
+----------------------------------------------------------------------
+

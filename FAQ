@@ -1,0 +1,100 @@
+
+Q. I get sunrise and sunset reversed when I add my own arguments.
+
+A. "longitude is positive East"
+
+   +42 -71 -5 is Boston, MA, EST.
+   +40 +86 -5 is south of Shihazi, China, with times interpreted as EST.
+ 
+   The sun does in fact set in China about the time it rises here.
+ 
+   I'm guess that you actually wanted +40 -86 -5.  That's somewhere
+   in Indiana, right?  The result is more reasonable:
+ 
+   Lat 40.520000, Long -86.519997, timezone -5.000000
+   Year 1999, Month 10, Day 11
+   Sunrise at 07:52 at 098 degrees
+   Sunset at 19:12 at 261 degrees
+ 
+   You're on the extreme western edge of the Eastern timezone, and
+   I'm on the extreme eastern edge, so the fact that the sun sets
+   over an hour later there is about right:
+ 
+   Lat 42.377834, Long -71.106323, timezone -5.000000
+   Year 1999, Month 10, Day 11
+   Sunrise at 06:52 at 099 degrees
+   Sunset at 18:08 at 261 degrees
+ 
+   One bug that I do know of is that I should be asking for timezone
+   instead of UTC offset.  That results for 40.52 -86.52 above is
+   wrong since it's correcting for DST because my locale uses DST,
+   but Indiana doesn't, right?  What an enlightened state: I hate
+   DST.  You should get the right answer on your machine: 6:52 & 18:12.
+ 
+----------------------------------------------------------------------
+ 
+Q. I can't see where to add the x10 events into your program.
+
+A. They go in a crontab file, x10events rewrites crontab files.
+
+   What I did was to create an x10 user.  I made sure that they had
+   adequate permissions to run heyu:
+
+      # grep x10 /etc/passwd
+      x10:*:100:14:Nobody:/:/bin/sh
+      # grep x10 /etc/group
+      uucp::14:uucp,x10
+      # ls -l /dev/ttyS0
+      crw-rw-r--   1 root     uucp       4,  64 Nov  2 06:16 /dev/ttyS0
+
+   and then, as root, did a `crontab -e -u x10` to edit their crontab.
+   This is where I put all the x10 events.
+   
+   In this way, x10 events are in a separate file from all other
+   cron entries.  This makes the x10events code simpler and reduces
+   the probability that a bug in x10events will stomp on some other
+   crontab entry.
+   
+   OK.  Then you put x10events.sh in /etc/cron.daily,  It does this:
+   
+      /usr/bin/crontab -u x10 -l \
+        | /usr/local/bin/x10events 42.3778343 -71.1063232 -5 \
+        > /tmp/x10.crontab
+   
+      /usr/bin/crontab -u x10 /tmp/x10.crontab
+      
+      rm /tmp/x10.crontab 
+   
+   'crontab -u x10 -l' fetchs x10's crontab file.  'x10events...'
+   rewrites it to standard out and '> /tmp/x10.crontab' dumps it to
+   a tmp file.  'crontab -u x10 /tmp/x10.crontab' replaces x10's
+   crontab file with the temp file.  The 'rm' cleans up the temp
+   file.
+   
+   If you want to edit the comments or the x10 commands, you just
+   run 'crontab -e -u x10` as root again.  x10events will pick up
+   the changes on the next run of cron.daily, or you can run
+   x10events.sh by hand.
+   
+   I suppose the functionality of x10events.sh could be incorporated
+   into the executable: that would be less complex, but it would also
+   less flexible.
+   
+----------------------------------------------------------------------
+
+Q. Why do you express timezones East of UTC as negative, that's wrong.
+
+A. ISO8601 doesn't agree: ftp://elsie.nci.nih.gov/pub/iso8601.ps.gz
+
+----------------------------------------------------------------------
+
+
+Q. x10events dumps core on my redhat 7.0 box.
+
+A. Sorry, but I don't have redhat 7.0, so I haven't been able to debug
+   this.  It seems to work under 7.1 and 7.2, and I remember hearing
+   people complain about a biggy gcc in 7.0, so maybe you should
+   upgrade.
+
+----------------------------------------------------------------------
+

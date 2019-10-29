@@ -1,0 +1,57 @@
+This code computes sunrise and sunset times. There is a library and an
+assortment of utilities. The most useful utility is x10events. This
+program parses crontab files and updates the time fields to track sun
+events given instructions in the comments.
+
+Combined with an X10 interface like HEYU or X10 this allows the
+scheduling lighting events that follow the changing seasons and DST
+automatically.  This application does not depend on X10, it can be
+used for any crontab entry you like.
+
+It is a port of some BASIC code by Roger W. Sinnott for the August
+1994 Sky & Telescope that I found on their website:
+  http://www.skypub.com/resources/software/basic/programs/sunup.bas
+
+I apologize for the inscrutability of the code, but I used the same opaque
+variable names used in the BASIC code to make debugging during the port
+more reasonable.
+
+riseset.mat is a massaged version of riseset.txt: the official sunrise and
+sunset times for Cambridge, Massachusetts, USA, 71:07W, 42:22N for the
+year 1999 from the U.S. Naval Observatory website at:
+  http://aa.usno.navy.mil/AA/data/docs/RS_OneYear.html
+
+There are several programs: today, year, x10events.
+
+'today' simply prints the time and azimuth of today's sunrise and sunset. 
+
+'year' prints an entire year's worth of sunrise and sunset times.  The
+companion script year.sh uses year, the table riseset.mat, and gnuplot to
+generate a verification plot.
+
+'x10events' is really the whole point of all this work.  It takes a
+crontab file that is assumed to contain trailing information about
+when the events are supposed to happen relative to sunrise and sunset
+events and generates a new table containing the correct times.  I use
+this to update my heyu timers by placing the script x10events.sh in
+/etc/cron.daily.  'x10events' assumes that all entries in the crontab
+are events that it should manage - I suggest placing these events in a
+separate crontab file - see the FAQ for a more detailed example.
+
+All programs take three arguments: latitude longitude and timezone.
+All values should be expressed as decimal values, not H:M:S.  Latitute
+is positive North of the equator.  Longitude is positive East of the
+prime meridian.  Timezones are positive East of UTC and should be
+expressed in hours for Standard Time.  Do not include Daylight Savings
+Time offsets.
+
+If the arguments are omited the defaults "42.3778343 -71.1063232 -5" are
+used.  Those correspond to Cambridge MA USA, EST.
+
+The package has been tested and successfully builds and runs under
+Redhat 5.2, 6.0, 6.2, and 7.2, OSF1 V4.0 (CXX=g++), IRIX64 6.4
+(CXX=CC), and IRIX 6.5 (CXX=CC).
+
+Christopher R. Wren
+c@drwren.com
+
