@@ -1,11 +1,31 @@
-0.30
-  o "x10events: don't trample month, day, and dow fields" - Brent DeShazer
+0.5
+	* x10events: include Doug's deprecated headers fix
+	* rpm: added a spec file for rpms, tested on FC2
 
-0.20
-  o fixed crontab "comment creep" caused by x10events
-  o x10events now pads hours and minutes with leading 0's
-  o added a FAQ.
+0.4
+	* x10events: fixed dropped zero mean in the presence of non-zero var
+	* x10events: cleaned up -pedantic warnings
 
-0.10
-  o initial release
+0.3  
+	* x10events: randomized events 
+	* x10events: preserve day month and dow fields
+	* x10events: preserve whole-line comments 	             
+	* x10events: look in environment for LAT LON and TOFF 
+	* x10events: read/write to a file to interoperate with crontab -e
+	* x10events: accept [-]hh:mm format in addition to decimal hours
+	* x10events.sh: use "crontab -e" instead of hokey "crontab -l" hack
 
+0.2
+	* x10events: fixed crontab "comment creep" caused by x10events 
+	* x10events: pad hours and minutes with leading 0's 
+	* added a FAQ. 
+
+0.1
+	* Initial 
+
+thanks to
+
+	"Doug Lim" <doug.lim@gmail.com>
+	"Phil Gregory" <phil_g@pobox.com>
+	"Russell Salerno" <rsalerno@li.net>
+	"Matt Williams" <mattrwilliams@yahoo.com>

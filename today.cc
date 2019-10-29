@@ -1,10 +1,10 @@
-#include <stdio.h>
-#include <math.h>
-#include <stdlib.h>
-#include <time.h>
-#include <ctype.h>
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <ctime>
+#include <cctype>
 
-#include "ephem.h"
+#include "x10ephem.h"
 
 int main (int argc, char *argv[])
 {

@@ -18,12 +18,12 @@
 // by "Christpher R. Wren" <c@drwren.com>
 // Sun Oct 10 1999 
 
-#include <stdio.h>
-#include <math.h>
-#include <stdlib.h>
-#include <time.h>
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <ctime>
 
-#include "ephem.h"
+#include "x10ephem.h"
 
 int main (int argc, char *argv[])
 {

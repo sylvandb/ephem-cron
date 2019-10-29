@@ -32,10 +32,9 @@
 // code.  Due to copyright concerns, those comments have been replaced 
 // by comments indicating line numbers in the original code.  Sorry.
 
-#include <stdio.h>
-#include <math.h>
-#include <stdlib.h>
-#include <time.h>
+#include <cmath>
+#include <cstdlib>
+#include <ctime>
 
 #define P1 (M_PI)
 #define P2 (2*P1)

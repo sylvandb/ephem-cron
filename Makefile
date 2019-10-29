@@ -1,28 +1,42 @@
 all: year today x10events
 
-libephem.a: ephem.o
-	ar r libephem.a ephem.o
+VERSION=0.50
 
-year: libephem.a year.o
-	$(CXX) year.o -o year -L. -lephem -lm 
+LIB=x10ephem-${VERSION}
+ARCHIVE=libx10ephem-${VERSION}.a
 
-today: libephem.a today.o
-	$(CXX) ephem.o today.o -o today -L. -lephem -lm 
+${ARCHIVE}: ephem.o
+	ar r ${ARCHIVE} ephem.o
 
-x10events: libephem.a x10events.o
-	$(CXX) ephem.o x10events.o -o x10events -L. -lephem -lm 
+year: ${ARCHIVE} year.o
+	$(CXX) year.o -o year -L. -lx10ephem-${VERSION} -lm 
 
-TARTAGETS=BUGS COPYING README FAQ CHANGELOG Makefile     \
-	  riseset.mat riseset.txt year.sh x10events.sh   \
-          ephem.cc ephem.h year.cc today.cc x10events.cc
+today: ${ARCHIVE} today.o
+	$(CXX) ephem.o today.o -o today -L. -lx10ephem-${VERSION} -lm 
 
-TARFILES= $(addprefix ephem-0.20/, $(TARTAGETS))
+x10events: ${ARCHIVE} x10events.o
+	$(CXX) ephem.o x10events.o -o x10events -L. -lx10ephem-${VERSION} -lm 
 
-ephem.tar.gz: $(TARTAGETS)
-	cd ..; tar czvf ephem-0.20/ephem.tar.gz $(TARFILES)
+TARTAGETS=BUGS COPYING README FAQ CHANGELOG Makefile        \
+	  riseset.mat riseset.txt year.sh x10events.sh      \
+          ephem.cc x10ephem.h year.cc today.cc x10events.cc \
+          ephem.spec sample.cron
 
-ephem.o: ephem.cc ephem.h
-today.o: today.cc ephem.h
-x10events.o: x10events.cc ephem.h
+TARFILES= $(addprefix x10ephem-${VERSION}/, $(TARTAGETS))
+
+ephemtar: $(TARTAGETS)
+	cd ..; tar czvf x10ephem-${VERSION}/x10ephem-${VERSION}.tar.gz $(TARFILES)
+
+install: ${ARCHIVE} year today x10events sample.cron
+	- mkdir -p ${DESTDIR}/usr/lib/
+	- mkdir -p ${DESTDIR}/usr/bin/
+	- mkdir -p ${DESTDIR}/usr/include/
+	cp ${ARCHIVE} ${DESTDIR}/usr/lib/
+	cp x10ephem.h ${DESTDIR}/usr/include/
+	cp year today x10events ${DESTDIR}/usr/bin/
+
+ephem.o: ephem.cc x10ephem.h
+today.o: today.cc x10ephem.h
+x10events.o: x10events.cc x10ephem.h
 
 
