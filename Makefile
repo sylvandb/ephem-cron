@@ -1,8 +1,10 @@
 VERSION=0.51sdb
 
-DEF_LAT=42.3778343
-DEF_LON=-71.1063232
-DEF_TZ=-5
+sinclude Makefile.local
+
+DEF_LAT ?= 42.3778343
+DEF_LON ?= -71.1063232
+DEF_TZ ?= -5
 
 LIB=x10ephem-${VERSION}
 ARCHIVE=lib${LIB}.a
