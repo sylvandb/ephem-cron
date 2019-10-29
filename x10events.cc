@@ -19,36 +19,53 @@
 // Sun Oct 10 1999 
 
 // interpret crontab vomments and modify the entry accordingly
-// comments should be # token [offset] [variance]
-// where token is one of "abs" for absolute times
-//                       "rise" for timesrelative to sunrise
-//                       "set" for times relative to sunset
-//       offset specifies time relative to the token
-//       variance specifies a bound for uniform noise added to the time 
+// comments should be # {token} [offset] [variance]
+// where
+//   {token} is one of
+//      "rise" for times relative to sunrise
+//      "set" for times relative to sunset
+//      "riseif before" conditional if time is before sunrise
+//      "riseif after"  conditional if time is after sunrise
+//      "setif before" conditional if time is before sunset
+//      "setif after"  conditional if time is after sunset
+// 	"abs" for absolute times, see note below
+//   offset specifies time relative to the token
+//   variance specifies a bound for uniform noise added to the time 
 // offset and variance may be specified as decimal hours or as [-]hh:mm
 //
-// special case: if abs specifies an offset and variance, then the
-// offset is the mean time.  If no arguments are specified for abs,
-// then the time is that specified by the hour and minute cron fields.
+// special note:
+//   If abs specifies an offset and variance, then the offset is the mean time.
+//   If no arguments are specified for abs, then the time is as specified by
+//   the hour and minute cron fields.
 //
 // for example:
 // 
-// 11 07 * * * /usr/local/bin/heyu turn tree on        # rise
-// 36 16 * * * /usr/local/bin/heyu turn tree off       # set 0.1
-// 04 16 * * * /usr/local/bin/heyu turn floorlamp on   # set -0.50
-// 00 00 * * * /usr/local/bin/heyu turn floorlamp off  # abs
-// 29 16 * * * /usr/local/bin/heyu turn office on      # set 0.1
-// 12 00 * * * /usr/local/bin/heyu turn office off     # abs 00:30 0.5
+// 11 07 * * * /usr/local/bin/heyu turn tree on        #x10 rise
+// 36 16 * * * /usr/local/bin/heyu turn tree off       #x10 set 0.1
+// 04 16 * * * /usr/local/bin/heyu turn floorlamp on   #x10 set -0.50
+// 00 00 * * * /usr/local/bin/heyu turn floorlamp off  #x10 abs
+// 29 16 * * * /usr/local/bin/heyu turn office on      #x10 set 0.1
+// 12 00 * * * /usr/local/bin/heyu turn office off     #x10 abs 00:30 0.5
+// 00 08 * * * /usr/local/bin/heyu turn overhead on    #x10 riseif before
+
+
+/**********************************************************
+ * ToDo:
+ *   use integer math for time instead of floats and doubles
+ */
 
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include <cmath>
-#include <cstdlib>
+#include <math.h>
+#include <stdlib.h>
 #include <unistd.h>
-#include <ctime>
-#include <string>
-#include "x10ephem.h"
+#include <time.h>
+#include <string.h>
+#include "ephem.h"
+
+#define _def2str(x) #x
+#define def2str(x) _def2str(x)
 
 using namespace std;
 
@@ -114,7 +131,7 @@ double timeconv(char *time)
       double min = atof(strtok(NULL, ":"));	// get seconds
       delete [] work;
 
-      if (hour>=0.0)
+      if (hour>=0.0 && '-' != *time)	 // preserve sign ???
 	return (hour + (min/60.0));
       else
 	return (hour - (min/60.0));
@@ -132,14 +149,19 @@ void usage()
 
 int main (int argc, char *argv[])
 {
+  // this is stupid, but dynamic ostrstream doesnt seem to work
+  // properly on large strings - arggg!!  JAVAJAVAJAVAJAVA
+  //char *outbuf = new char[1000000];
+  //ostrstream out(outbuf, 1000000);
+  //  that's right, strstream is BROKEN!!!!  using stringstream instead.
   ostringstream out;
- 
+
   istream *in = &cin;
   char *filename = (char*)NULL;
 
-  double latitude  = 42.3778343;;
-  double longitude = -71.1063232;
-  double timezone  = -5.0;
+  double latitude  = DLAT;
+  double longitude = DLON;
+  double timezone;
 
   if (getenv("LAT") != NULL)
     latitude = atof(getenv("LAT"));
@@ -147,8 +169,12 @@ int main (int argc, char *argv[])
   if (getenv("LON") != NULL)
     longitude = atof(getenv("LON"));
 
-  if (getenv("TOFF") != NULL)
-    timezone = atof(getenv("TOFF"));
+  if (getenv("TOFF") != NULL) {
+    char *fakeargv[5]={NULL};
+    fakeargv[3]=getenv("TOFF");
+    timezone = (double)parseTimezone(4,fakeargv);
+  } else
+    timezone = (double)parseTimezone(0,NULL);
   
   if ((argc!=1) && (argc!=2) && (argc!=4) && (argc!=5))
     {
@@ -209,7 +235,7 @@ int main (int argc, char *argv[])
 	  Y, M, D,
 	  risep, rise, riseaz, setp, set, setaz, allday);
   
-  if (tmp->tm_isdst)		// deal with daylight savings time
+  if (tmp->tm_isdst > 0)		// deal with daylight savings time
     {
       rise += 1;
       set += 1;
@@ -232,7 +258,7 @@ int main (int argc, char *argv[])
   while(! in->eof())
     {
       in->getline(buf, buflen, '\n');
-      if (buf[0] == '#')
+      if (buf[0] == '#' || !in->eof() && !strstr(buf,"#x10"))
         {
 	  out << buf << endl;
         }
@@ -248,7 +274,13 @@ int main (int argc, char *argv[])
 	  char *month;
 	  char *dow;
 
-	  minute = strtok(buf, " "); // minute
+	  // split line into two parts to prevent crashing on some comment lines
+	  char *cronentry = strtok(buf,"#");
+	  char *x10tail = strtok((char *) NULL, "\0");
+	  char *side;
+
+	  // process cron part
+	  minute = strtok(cronentry, " "); // minute
 	  hour = strtok((char *) NULL, " "); // hour
 
 	  day =     strtok((char *) NULL, " "); // day of month
@@ -257,43 +289,116 @@ int main (int argc, char *argv[])
 
 	  command = strtok((char *) NULL, "#"); // command
 
-	  token = strtok((char *) NULL, " "); // rise,set,abs
-	  offset = strtok((char *) NULL, " "); // offset
-	  variance = strtok((char *) NULL, " "); // random 
+	  // process x10tail
+	  token = strtok(x10tail, " "); // pass by the "#x10 " to the real token
 
-	  double mean = timeconv(offset);
-	  double var = timeconv(variance);
+	  if (!strcmp(token,"x10#")) {	// x10 conditional that was false the last time
+		  // process cron part previously commented out
+		  minute = strtok((char *) NULL, " "); // minute
+		  hour = strtok((char *) NULL, " "); // hour
+
+		  day =     strtok((char *) NULL, " "); // day of month
+		  month =   strtok((char *) NULL, " "); // month
+		  dow =     strtok((char *) NULL, " "); // day of week
+
+		  command = strtok((char *) NULL, "#"); // command
+
+		  // process the real x10tail
+		  token = strtok((char *) NULL, " "); // pass by the "#x10 " to the real token
+	  }
+
+	  token = strtok((char *) NULL, " "); // riseif,setif,rise,set,abs
 
   	  if (command != (char *) NULL)
 	    {
 	      double special = 0.0;	  
-	      char* tag;
+	      char* tag=NULL;
+	      char tagspace[30];	// room to spare
+	      bool conditional = false;
 	      
+	      if (!strcmp(token, "riseif"))
+		{
+		  conditional = true;
+		  tag = "#x10 riseif ";
+		  special = (atof(hour)*60 + atof(minute));
+		}
+	      if (!strcmp(token, "setif"))
+		{
+		  conditional = true;
+		  tag = "#x10 setif ";
+		  special = (atof(hour)*60 + atof(minute));
+		}
+	      
+	      if (conditional)
+	      {
+		  side  = strtok((char *) NULL, " "); // before,after
+	      }
+
+	    offset = strtok((char *) NULL, " "); // offset
+	    variance = strtok((char *) NULL, " "); // randomize
+	    double mean = timeconv(offset);
+	    double var = timeconv(variance);
+
+	      if (conditional && (mean!=0.0 || var!=0.0))
+	      {
+		  special = 0.0;
+	      }
+
 	      if (!strcmp(token, "abs"))
 		{
-		  tag = "# abs";
+		  tag = "#x10 abs";
 
 		  if ((mean==0.0) && (var==0.0))
 		    {
-		      special = (atof(hour) + atof(minute)/60.0);
+		      special = (atof(hour)*60 + atof(minute));
 		    }
 		}
 	      if (!strcmp(token, "rise"))
 		{
-		  tag = "# rise";
-		  special = rise;
+		  tag = "#x10 rise";
+		  special = rise*60;
 		}
 	      if (!strcmp(token, "set"))
 		{
-		  tag = "# set";
-		  special = set;
+		  tag = "#x10 set";
+		  special = set*60;
 		}
-	      
-	    double time = wrap( noise( wrap(special+mean), var));
-	    
-	    int hour = (int) floor(time);
-	    int minute = (int) ((time - hour) * 60.0);
-	    
+
+
+	    if (!tag)
+	    {
+		strcpy(tagspace,"# x10 unknown: ");
+		tag=tagspace;
+		strcat(tag,token);
+	    }
+
+
+	    double time = wrap( noise( wrap(special/60+mean), var));
+
+	    if (conditional) //!strcmp(token, "riseif") || !strcmp(token, "setif"))
+	    {
+		strcpy(tagspace,tag);
+		tag=tagspace;
+
+		if ('b'==*side)	// before
+		{
+		    strcat(tag,"before");
+		    if (time > ('r'==*token?rise:set)) // time not before
+  			out << " #x10# ";
+		}
+		else		// after
+		{
+		    strcat(tag,"after");
+		    if (time < ('r'==*token?rise:set)) // time not after
+  			out << " #x10# ";
+		}
+	    }
+
+	    time*=60;	// this gets rid of an off-by-1 in abs/riseif/setif
+	    int hour = (int) floor(time/60);
+	    int minute = (int) (time - hour*60.0);
+	    //out << " #x10 special: " << special << "  time: " << time << endl;
+
 	    print_modifed(&out, minute, hour, 
 			  day, month, dow,
 			  command, tag,
@@ -301,6 +406,14 @@ int main (int argc, char *argv[])
 	  }
 	}
     }
+
+  // add my special ending tag lines
+  out << " #x10 operands:  {rise|set|abs|riseif|setif} [before|after] [offset [variance]]" << endl;
+  out << " #x10 " def2str(VERSION) " processed " << Y;
+  out.width(2); out.fill('0'); out << M;
+  out.width(2); out.fill('0'); out << D << "-";
+  out.width(2); out.fill('0'); out << tmp->tm_hour;
+  out.width(2); out.fill('0'); out << tmp->tm_min << endl;
 
   if (filename == (char*) NULL)
     {

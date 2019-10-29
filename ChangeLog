@@ -1,3 +1,9 @@
+0.4sdb	* all: compile with gcc 3.3
+	* all: timezone from environment, not specified
+	* all: default long-lat from Makefile
+	* all: version macro in Makefile
+	* x10events: more robust crontab sharing
+
 0.4
 	* x10events: fixed dropped zero mean in the presence of non-zero var
 	* x10events: cleaned up -pedantic warnings

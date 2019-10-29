@@ -19,6 +19,23 @@
 // August 5 1999
 
 
+// default to Cambridge, MA if not specified elsewhere
+
+#ifndef DLAT
+#define DLAT 42.3778343
+#endif
+
+#ifndef DLON
+#define DLON -71.1063232
+#endif
+
+#ifndef DTZ
+#define DTZ -5
+#endif
+
+float parseTimezone(int argc,char **argv);
+
+
 extern void
 sunpos(float T,			// Julian day
        float TT,		// fractional centuries since 1900

@@ -1,42 +1,42 @@
 all: year today x10events
 
-VERSION=0.50
+CXXFLAGS=-D VERSION=$(VERSION) -D DLON=$(DEF_LON) -D DLAT=$(DEF_LAT)
 
-LIB=x10ephem-${VERSION}
-ARCHIVE=libx10ephem-${VERSION}.a
+all: year today x10events
 
-${ARCHIVE}: ephem.o
-	ar r ${ARCHIVE} ephem.o
+clean:
+	rm -f libephem.a ephem.o
+	rm -f year.o today.o x10events.o
 
-year: ${ARCHIVE} year.o
-	$(CXX) year.o -o year -L. -lx10ephem-${VERSION} -lm 
+realclean: clean
+	rm -f year today x10events
 
-today: ${ARCHIVE} today.o
-	$(CXX) ephem.o today.o -o today -L. -lx10ephem-${VERSION} -lm 
+libephem.a: ephem.o
+	ar r libephem.a ephem.o
 
-x10events: ${ARCHIVE} x10events.o
-	$(CXX) ephem.o x10events.o -o x10events -L. -lx10ephem-${VERSION} -lm 
+year: libephem.a year.o
+	$(CXX) year.o -o year -L. -lephem -lm 
 
-TARTAGETS=BUGS COPYING README FAQ CHANGELOG Makefile        \
-	  riseset.mat riseset.txt year.sh x10events.sh      \
-          ephem.cc x10ephem.h year.cc today.cc x10events.cc \
-          ephem.spec sample.cron
+today: libephem.a today.o
+	$(CXX) ephem.o today.o -o today -L. -lephem -lm 
 
-TARFILES= $(addprefix x10ephem-${VERSION}/, $(TARTAGETS))
+x10events: libephem.a x10events.o
+	$(CXX) ephem.o x10events.o -o x10events -L. -lephem -lm 
 
-ephemtar: $(TARTAGETS)
-	cd ..; tar czvf x10ephem-${VERSION}/x10ephem-${VERSION}.tar.gz $(TARFILES)
+TARTARGETS=BUGS COPYING README FAQ ChangeLog sample.cron \
+	  riseset.mat riseset.txt \
+	  astrotwilight.txt \
+	  civiltwilight.mat civiltwilight.txt \
+	  sunup.bas year.sh Makefile \
+	  ephem.cc ephem.h year.cc today.cc x10events.cc x10events.sh
 
-install: ${ARCHIVE} year today x10events sample.cron
-	- mkdir -p ${DESTDIR}/usr/lib/
-	- mkdir -p ${DESTDIR}/usr/bin/
-	- mkdir -p ${DESTDIR}/usr/include/
-	cp ${ARCHIVE} ${DESTDIR}/usr/lib/
-	cp x10ephem.h ${DESTDIR}/usr/include/
-	cp year today x10events ${DESTDIR}/usr/bin/
+TARFILES= $(addprefix ephem-$(VERSION)/, $(TARTARGETS))
 
-ephem.o: ephem.cc x10ephem.h
-today.o: today.cc x10ephem.h
-x10events.o: x10events.cc x10ephem.h
+archive: realclean $(TARTARGETS)
+	cd ..; tar czvf ephem-$(VERSION).tar.gz $(TARFILES)
+
+ephem.o: ephem.cc ephem.h
+today.o: today.cc ephem.h
+x10events.o: x10events.cc ephem.h
 
 

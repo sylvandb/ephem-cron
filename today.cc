@@ -1,10 +1,9 @@
-#include <cstdio>
-#include <cmath>
-#include <cstdlib>
-#include <ctime>
-#include <cctype>
+#include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
+#include <time.h>
 
-#include "x10ephem.h"
+#include "ephem.h"
 
 int main (int argc, char *argv[])
 {
@@ -19,31 +18,12 @@ int main (int argc, char *argv[])
   float zone;
 
   if (argc > 1) latitude = atof (argv[1]);
-  else latitude = 42.3778343;
+  else latitude = DLAT;
 
   if (argc > 2) longitude = atof (argv[2]);
-  else longitude = -71.1063232;
+  else longitude = DLON;
 
-  if (argc > 3)
-    {
-      if (argv[3][0] == '-' || isdigit(argv[3][0]))
-	{
-	  zone = atof (argv[3]);
-	}
-      else
-	{
-	  char buf[1024];
-	  sprintf(buf,"TZ=%s",argv[3]);
-	  putenv(buf);
-	  tzset();
-	  zone = -((float)timezone)/3600.0;
-	}
-    }
-  else 
-    {
-      tzset();
-      zone = -((float)timezone)/3600.0;
-    }
+  zone=parseTimezone(argc,argv);
 
   printf("Lat %f, Long %f, timezone %f\n", latitude, longitude, zone);
   

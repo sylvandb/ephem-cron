@@ -1,18 +1,18 @@
 # examples and test input
-00 00 * * * /usr/local/bin/heyu turn setevent on    # set
-00 00 * * * /usr/local/bin/heyu turn setevent on    # set +0.50
-00 00 * * * /usr/local/bin/heyu turn setevent on    # set -0.50 0:10
-00 00 * * * /usr/local/bin/heyu turn riseevent on   # rise  0.00 0.1
-00 00 * * * /usr/local/bin/heyu turn riseevent on   # rise +0.5 
-00 00 * * * /usr/local/bin/heyu turn riseevent on   # rise -0:15 0:10
-00 18 * * * /usr/local/bin/heyu turn absevent on    # abs 
-00 00 * * * /usr/local/bin/heyu turn absevent off   # abs 18:00 00:15
-00 00 1 * * /usr/local/bin/heyu turn dayevent on    # set -0.25
-00 00 2 * * /usr/local/bin/heyu turn dayevent on    # rise -0.25
-30 00 3 * * /usr/local/bin/heyu turn dayevent off   # abs 
-00 00 * 1 * /usr/local/bin/heyu turn monevent on    # set -0.25
-00 00 * 2 * /usr/local/bin/heyu turn monevent on    # rise -0.25
-35 00 * 3 * /usr/local/bin/heyu turn monevent off   # abs 
-00 00 * * 1 /usr/local/bin/heyu turn weekevent on   # set -0.25
-00 00 * * 2 /usr/local/bin/heyu turn weekevent on   # rise -0.25
-40 00 * * 3 /usr/local/bin/heyu turn weekevent off  # abs
+00 00 * * * /usr/local/bin/heyu turn setevent on    #x10 set
+00 00 * * * /usr/local/bin/heyu turn setevent on    #x10 set +0.50
+00 00 * * * /usr/local/bin/heyu turn setevent on    #x10 set -0.50 0:10
+00 00 * * * /usr/local/bin/heyu turn riseevent on   #x10 rise  
+00 00 * * * /usr/local/bin/heyu turn riseevent on   #x10 rise +0.5 
+00 00 * * * /usr/local/bin/heyu turn riseevent on   #x10 rise -0:15 0:10
+00 18 * * * /usr/local/bin/heyu turn absevent on    #x10 abs 
+00 00 * * * /usr/local/bin/heyu turn absevent off   #x10 abs 18:00 00:15
+00 00 1 * * /usr/local/bin/heyu turn dayevent on    #x10 set -0.25
+00 00 2 * * /usr/local/bin/heyu turn dayevent on    #x10 rise -0.25
+30 00 3 * * /usr/local/bin/heyu turn dayevent off   #x10 abs 
+00 00 * 1 * /usr/local/bin/heyu turn monevent on    #x10 set -0.25
+00 00 * 2 * /usr/local/bin/heyu turn monevent on    #x10 rise -0.25
+35 00 * 3 * /usr/local/bin/heyu turn monevent off   #x10 abs 
+00 00 * * 1 /usr/local/bin/heyu turn weekevent on   #x10 set -0.25
+00 00 * * 2 /usr/local/bin/heyu turn weekevent on   #x10 rise -0.25
+40 00 * * 3 /usr/local/bin/heyu turn weekevent off  #x10 abs

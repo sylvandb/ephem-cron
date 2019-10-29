@@ -32,9 +32,10 @@
 // code.  Due to copyright concerns, those comments have been replaced 
 // by comments indicating line numbers in the original code.  Sorry.
 
-#include <cmath>
-#include <cstdlib>
-#include <ctime>
+#include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
+#include <time.h>
 
 #define P1 (M_PI)
 #define P2 (2*P1)
@@ -430,4 +431,44 @@ riseset(float B5,		// Latitude +N -S
     }
   // line 890 
   // line 280
+}
+
+
+
+
+#include <time.h>
+#include <ctype.h>
+
+float parseTimezone(int argc,char **argv)
+{
+  float zone;
+
+  if (argc > 3 && (argv[3][0] == '-' || isdigit(argv[3][0])))
+  {
+      zone = atof (argv[3]);
+  }
+  else
+  {
+    if (argc > 3)
+    {
+        char buf[1024];
+        sprintf(buf,"TZ=%s",argv[3]);
+        putenv(buf);
+    }
+    tzset();
+    zone = -((float)timezone)/3600.0;
+/* add in DST  NO!!!!
+    // tzset() is implied by localtime():
+    //tzset();
+    time_t gmt=time(NULL);
+    struct tm *ptm=localtime(&gmt);
+    zone = -((float)timezone)/3600.0;
+    if (daylight && ptm->tm_isdst>0)
+    {
+      zone+=ptm->tm_isdst; // should we do this, or just add 1???
+    }
+// */
+  }
+
+  return zone;
 }

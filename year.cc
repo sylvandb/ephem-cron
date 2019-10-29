@@ -18,12 +18,12 @@
 // by "Christpher R. Wren" <c@drwren.com>
 // Sun Oct 10 1999 
 
-#include <cstdio>
-#include <cmath>
-#include <cstdlib>
-#include <ctime>
+#include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
+#include <time.h>
 
-#include "x10ephem.h"
+#include "ephem.h"
 
 int main (int argc, char *argv[])
 {
@@ -38,13 +38,12 @@ int main (int argc, char *argv[])
   float timezone;
 
   if (argc > 1) latitude = atof (argv[1]);
-  else latitude = 42.3778343;
+  else latitude = DLAT;
 
   if (argc > 2) longitude = atof (argv[2]);
-  else longitude = -71.1063232;
+  else longitude = DLON;
 
-  if (argc > 3) timezone = atof (argv[3]);
-  else timezone = -5;
+  timezone=parseTimezone(argc,argv);
 
   time_t wallclock;  time(&wallclock);
   struct tm *tmp = localtime(&wallclock);
