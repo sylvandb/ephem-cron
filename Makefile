@@ -1,4 +1,4 @@
-VERSION=0.51sdb
+VERSION=0.52sdb
 
 sinclude Makefile.local
 
@@ -13,15 +13,15 @@ CXXFLAGS=-D VERSION=${VERSION} -D DLAT=${DEF_LAT} -D DLON=${DEF_LON} -D DTZ=${DE
 
 
 
-all: year today x10events
+all: year today cronevents
 
 
 clean: clean-plot
 	rm -f ${ARCHIVE} ephem.o
-	rm -f year.o today.o x10events.o
+	rm -f year.o today.o cronevents.o
 
 realclean: clean
-	rm -f year today x10events suntime
+	rm -f year today cronevents suntime
 
 
 ${ARCHIVE}: ephem.o
@@ -34,16 +34,16 @@ year: ${ARCHIVE} year.o
 today: ${ARCHIVE} today.o
 	$(CXX) ephem.o today.o -o today -L. -l${LIB} -lm
 
-x10events: ${ARCHIVE} x10events.o
-	$(CXX) ephem.o x10events.o -o x10events -L. -l${LIB} -lm
+cronevents: ${ARCHIVE} cronevents.o
+	$(CXX) ephem.o cronevents.o -o cronevents -L. -l${LIB} -lm
 
 
 suntime: suntime.c
 	$(CXX) $(CXXFLAGS) -o suntime suntime.c -L. -lm
 
 TARTARGETS=BUGS COPYING README FAQ CHANGELOG Makefile     \
-	  riseset.mat riseset.txt year.sh x10events.sh   \
-	  ephem.cc ephem.h year.cc today.cc x10events.cc \
+	  riseset.mat riseset.txt year.sh cronevents.sh   \
+	  ephem.cc ephem.h year.cc today.cc cronevents.cc \
 	  sunup.bas suntime.c year.sh Makefile \
 	  ephem.spec sample.cron
 	  #astrotwilight.txt civiltwilight.mat civiltwilight.txt \
@@ -56,17 +56,17 @@ ephemtar: $(TARTARGETS)
 archive: realclean ephemtar
 
 
-install: ${ARCHIVE} year today x10events sample.cron
+install: ${ARCHIVE} year today cronevents sample.cron
 	- mkdir -p ${DESTDIR}/usr/lib/
 	- mkdir -p ${DESTDIR}/usr/bin/
 	- mkdir -p ${DESTDIR}/usr/include/
 	cp ${ARCHIVE} ${DESTDIR}/usr/lib/
 	cp ephem.h ${DESTDIR}/usr/include/
-	cp year today x10events ${DESTDIR}/usr/bin/
+	cp year today cronevents ${DESTDIR}/usr/bin/
 
 ephem.o: ephem.cc ephem.h
 today.o: today.cc ephem.h
-x10events.o: x10events.cc ephem.h
+cronevents.o: cronevents.cc ephem.h
 
 
 

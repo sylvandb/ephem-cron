@@ -1,5 +1,5 @@
 %define name	ephem
-%define version	0.50
+%define version	0.52sdb
 %define release 1
 
 Summary:	ephem - Solar Ephemeris Data for lighting control
@@ -16,11 +16,12 @@ BuildRoot:	%{_tmppath}/%{name}-%{version}-root
 
 %description
 This code computes sunrise and sunset times. There is a library and an
-assortment of utilities. The most useful utility is x10events. This
+assortment of utilities. The most useful utility is cronevents. This
 program parses crontab files and updates the time fields to track sun
-events given instructions in the comments.  Combined with an X10
-interface like HEYU or X10 this allows the scheduling lighting events
-that follow the changing seasons and DST automatically.  This
+events given instructions in the comments. Combined with a lighting
+controller like smart home products such as tp-link or wemo, or X10
+modules using an interface like HEYU, this allows scheduling lighting
+events that follow the changing seasons and DST automatically. This
 application does not depend on X10, it can be used for any crontab
 entry you like.
 
@@ -44,7 +45,7 @@ make DESTDIR=$RPM_BUILD_ROOT install
 %doc sample.cron
 /usr/bin/today
 /usr/bin/year
-/usr/bin/x10events
+/usr/bin/cronevents
 /usr/include/ephem.h
 /usr/lib/libephem-%{version}.a
 

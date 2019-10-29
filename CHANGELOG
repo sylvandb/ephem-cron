@@ -1,6 +1,10 @@
 ToDo:
-	* x10events: support dawn and dusk like rise and set
+	* cronevents: support dawn and dusk like rise and set
+	* cronevents: simple way to build with different tag (not "#x10")
 
+
+0.52sdb
+	* rename x10events => cronevents
 
 0.51sdb
 	* x10events: handle lines up to 2.5KBytes (was 256 bytes)

@@ -1,4 +1,4 @@
-// x10events.cc: adjust x10 crontab according to comments
+// cronevents.cc: adjust x10 crontab according to comments
 // Copyright (C) 1999 "Christpher R. Wren" <c@drwren.com>
 // 
 // This program is free software; you can redistribute it and/or modify
@@ -165,7 +165,7 @@ int fixedpoint(int offset,bool intpart,double f)
 
 void usage()
 {
-  cerr << "usage: x10events";
+  cerr << "usage: cronevents";
   cerr << " [crontab_file]";
   cerr << " [lat(deg) long(deg) zone(hrs)]";
   cerr << endl;
