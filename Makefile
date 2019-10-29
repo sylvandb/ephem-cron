@@ -13,7 +13,7 @@ CXXFLAGS=-D VERSION=${VERSION} -D DLAT=$(DEF_LAT) -D DLON=$(DEF_LON)
 all: year today x10events
 
 
-clean:
+clean: clean-plot
 	rm -f ${ARCHIVE} ephem.o
 	rm -f year.o today.o x10events.o
 
@@ -66,3 +66,43 @@ today.o: today.cc x10ephem.h
 x10events.o: x10events.cc x10ephem.h
 
 
+
+# plot target replaces year.sh (aka ephemyear.sh)
+plot: plot.gif
+
+plot.gif: plot.gnuplot rise-my.txt set-my.txt rise-off.txt set-off.txt
+	gnuplot   < $<   > $@
+
+clean-plot:
+	rm -f rise-off.txt set-off.txt rise-my.txt set-my.txt plot.gnuplot plot.gif
+
+define PLOTCOMMANDS
+set terminal gif
+set title  "Calculated sunrise and sunset"
+set xlabel "Julian Day"
+set ylabel "Hour of Day"
+set xrange [0:365]
+set yrange [0:24]
+set style data lines
+plot \\
+  "rise-my.txt"   title "calculated rise", \\
+  "rise-off.txt"  title "official rise",   \\
+  "set-my.txt"    title "calculated set",  \\
+  "set-off.txt"   title "official set"
+endef
+export PLOTCOMMANDS
+plot.gnuplot: Makefile
+	rm -f $@
+	echo "$$PLOTCOMMANDS" >> $@
+
+rise-off.txt: riseset.mat
+	awk '{print $$1}'   < $<   > $@
+
+set-off.txt: riseset.mat
+	awk '{print $$2}'   < $<   > $@
+
+rise-my.txt: year
+	./year 42.3778343 -71.1063232 -5 | awk '{print $$1}' > $@
+
+set-my.txt: year
+	./year 42.3778343 -71.1063232 -5 | awk '{print $$2}' > $@
