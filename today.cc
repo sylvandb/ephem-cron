@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "x10ephem.h"
+#include "ephem.h"
 
 #define _def2str(x) #x
 #define def2str(x) _def2str(x)

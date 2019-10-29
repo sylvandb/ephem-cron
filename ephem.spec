@@ -1,8 +1,8 @@
-%define name	x10ephem
+%define name	ephem
 %define version	0.50
 %define release 1
 
-Summary:	x10ephem - Solar Ephemeris Data for lighting control
+Summary:	ephem - Solar Ephemeris Data for lighting control
 Name:		%{name}
 Version:	%{version}
 Release:	%{release}
@@ -45,8 +45,8 @@ make DESTDIR=$RPM_BUILD_ROOT install
 /usr/bin/today
 /usr/bin/year
 /usr/bin/x10events
-/usr/include/x10ephem.h
-/usr/lib/libx10ephem-%{version}.a
+/usr/include/ephem.h
+/usr/lib/libephem-%{version}.a
 
 %clean 
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT

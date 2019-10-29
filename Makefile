@@ -6,7 +6,7 @@ DEF_LAT ?= 42.3778343
 DEF_LON ?= -71.1063232
 DEF_TZ ?= -5
 
-LIB=x10ephem-${VERSION}
+LIB=ephem-${VERSION}
 ARCHIVE=lib${LIB}.a
 
 CXXFLAGS=-D VERSION=${VERSION} -D DLAT=${DEF_LAT} -D DLON=${DEF_LON} -D DTZ=${DEF_TZ}
@@ -43,7 +43,7 @@ suntime: suntime.c
 
 TARTARGETS=BUGS COPYING README FAQ CHANGELOG Makefile     \
 	  riseset.mat riseset.txt year.sh x10events.sh   \
-	  ephem.cc x10ephem.h year.cc today.cc x10events.cc \
+	  ephem.cc ephem.h year.cc today.cc x10events.cc \
 	  sunup.bas suntime.c year.sh Makefile \
 	  ephem.spec sample.cron
 	  #astrotwilight.txt civiltwilight.mat civiltwilight.txt \
@@ -61,12 +61,12 @@ install: ${ARCHIVE} year today x10events sample.cron
 	- mkdir -p ${DESTDIR}/usr/bin/
 	- mkdir -p ${DESTDIR}/usr/include/
 	cp ${ARCHIVE} ${DESTDIR}/usr/lib/
-	cp x10ephem.h ${DESTDIR}/usr/include/
+	cp ephem.h ${DESTDIR}/usr/include/
 	cp year today x10events ${DESTDIR}/usr/bin/
 
-ephem.o: ephem.cc x10ephem.h
-today.o: today.cc x10ephem.h
-x10events.o: x10events.cc x10ephem.h
+ephem.o: ephem.cc ephem.h
+today.o: today.cc ephem.h
+x10events.o: x10events.cc ephem.h
 
 
 
