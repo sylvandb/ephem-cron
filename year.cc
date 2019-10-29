@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "ephem.h"
+#include "x10ephem.h"
 
 int main (int argc, char *argv[])
 {
